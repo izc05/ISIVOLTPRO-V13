@@ -2369,6 +2369,17 @@ function applyWeekBulk(){
 function initMeSelect(){
   const sel = document.getElementById("meSelect");
   if(!sel) return;
+
+  if(isTech()){
+    const me = meName();
+    sel.innerHTML = `<option value="${escapeHtml(me)}">${escapeHtml(me)}</option>`;
+    sel.value = me;
+    sel.disabled = true;
+    UIv5.me = me;
+    saveUIv5(UIv5);
+    return;
+  }
+
   const sector = document.getElementById("sectorSelect")?.value || "Electricidad";
   const roster = state.rosters?.[sector];
   const names = roster?.names ? [...roster.names] : [];
@@ -3568,6 +3579,7 @@ function applyRoleUI(){
   const btnRosters = document.getElementById("btnRosters");
   const btnLogout = document.getElementById("btnLogout");
   const meSel = document.getElementById("meSelect");
+  const meLabel = document.getElementById("meLabel");
 
   if(btnUsers) btnUsers.classList.toggle("hiddenRole", !canManageUsers());
   if(btnRosters) btnRosters.classList.toggle("hiddenRole", !canImportRosters());
@@ -3583,7 +3595,10 @@ function applyRoleUI(){
     if(meSel){
       // set option to me, disable editing
       meSel.disabled = true;
+      meSel.innerHTML = `<option value="${escapeHtml(meName())}">${escapeHtml(meName())}</option>`;
+      meSel.value = meName();
     }
+    if(meLabel) meLabel.textContent = "Técnico";
     if(UIv5.me !== meName() || !UIv5.incMine || !UIv5.otMine){
       UIv5.me = meName();
       UIv5.incMine = true;
@@ -3600,6 +3615,7 @@ function applyRoleUI(){
     }catch{}
   }else{
     if(meSel) meSel.disabled = false;
+    if(meLabel) meLabel.textContent = "Yo";
     document.querySelectorAll('#btnQuick,#btnGuardPhones,#btnWeekEdit,#btnShiftRequest,#btnAuto,#btnCloseDay,#btnPagePlanner,#tabPlanner').forEach(el=>el?.classList.remove('hiddenRole'));
   }
 }
