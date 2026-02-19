@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Panel Central ✨ — Hospital (v1)</title>
+  <title>IsivoltPro v13 ✨ — Hospital (v1)</title>
   <link rel="stylesheet" href="styles.css" />
 
   <!-- ✅ Motion / micro-animaciones (sin mareo, respeta accesibilidad) -->
@@ -101,7 +101,7 @@
       <div class="loginBrand">
         <div class="logoBubble">⚡</div>
         <div>
-          <div class="loginTitle">Panel de Control</div>
+          <div class="loginTitle">IsivoltPro v13</div>
           <div class="loginSub">Acceso seguro · Coordinador / Técnico</div>
         </div>
       </div>
@@ -132,7 +132,7 @@
     <div class="brand">
       <div class="logoDot"></div>
       <div>
-        <div class="title">Panel Central ✨</div>
+        <div class="title">IsivoltPro v13 ✨</div>
         <div class="subtitle">Dispatch Board • Turnos + Guardia + Timeline</div>
       </div>
     </div>
@@ -370,12 +370,17 @@
   <div id="modalImport" class="modal hidden">
     <div class="modalCard">
       <div class="modalHead">
-        <h3>Importar cuadrante (CSV formato A)</h3>
+        <h3>Importar cuadrante (Excel/CSV)</h3>
         <button id="btnCloseImport" class="btn btn-small">Cerrar</button>
       </div>
       <p class="muted">
-        Pega el CSV: primera columna <b>Nombre</b>, columnas 1..28 con M/T/N/D (o combinados tipo M/T).
+        Puedes <b>buscar y subir</b> un archivo <b>Excel (.xlsx/.xls)</b> o <b>CSV</b>. También puedes pegar texto CSV manualmente.
       </p>
+      <div class="formRow" style="margin-bottom:10px;">
+        <label class="btn btn-outline" for="importRosterFile" style="cursor:pointer;">📎 Buscar archivo Excel/CSV</label>
+        <input id="importRosterFile" type="file" accept=".xlsx,.xls,.csv" hidden />
+        <span id="importRosterFileName" class="muted">Sin archivo seleccionado</span>
+      </div>
       <textarea id="csvInput" class="textarea" rows="10"></textarea>
       <div class="modalActions">
         <button id="btnLoadDefault" class="btn">Cargar ejemplo (Fontanería Feb 2026)</button>
