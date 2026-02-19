@@ -15,6 +15,7 @@ const LS = {
   INCIDENTS: "panel_incidents_v1",
   OTS: "panel_ots_v1",
   CUSTOM_TYPES: "panel_custom_types_v1",
+  MESSAGES: "panel_central_messages_v1",
 };
 
 // ---------- Global mutable state ----------
@@ -27,6 +28,7 @@ function loadFullState(){
     incidents:   JSON.parse(localStorage.getItem(LS.INCIDENTS)     || "[]"),
     ots:         JSON.parse(localStorage.getItem(LS.OTS)           || "[]"),
     customTypes: JSON.parse(localStorage.getItem(LS.CUSTOM_TYPES)  || "[]"),
+    messages:    JSON.parse(localStorage.getItem(LS.MESSAGES)      || "[]"),
   };
 }
 const state = loadFullState();
@@ -41,6 +43,7 @@ function saveState(){
   localStorage.setItem(LS.INCIDENTS,    JSON.stringify(state.incidents));
   localStorage.setItem(LS.OTS,          JSON.stringify(state.ots));
   localStorage.setItem(LS.CUSTOM_TYPES, JSON.stringify(state.customTypes));
+  localStorage.setItem(LS.MESSAGES,     JSON.stringify(state.messages));
 }
 
 const SHIFT = {
@@ -1511,6 +1514,7 @@ function rerenderAll(){
   setupTouchDragAndDrop();
   renderTechGrid(state, dateISO, sector);
   renderShiftChangeLog();
+  renderCentralMessageLog();
   renderIncidents();
   renderOTs();
   renderFilterChips();
@@ -1587,6 +1591,7 @@ function resetAll(){
   localStorage.removeItem(LS.CHANGES);
   localStorage.removeItem(LS.INCIDENTS);
   localStorage.removeItem(LS.OTS);
+  localStorage.removeItem(LS.MESSAGES);
   const csvInput = $("csvInput");
   if(csvInput) csvInput.value = "";
   // Reset global state
@@ -1695,6 +1700,64 @@ function renderShiftChangeLog(){
     `).join("");
 
   $("shiftChangeLog").innerHTML = rows || `<tr><td colspan="6" class="muted">Sin solicitudes registradas.</td></tr>`;
+}
+
+
+function openCentralMessage(){
+  const msgType = document.getElementById("centralMsgType");
+  const msgText = document.getElementById("centralMsgText");
+  if(msgType) msgType.value = "Cambio de turno";
+  if(msgText) msgText.value = "";
+  openModal($("modalCentralMessage"));
+}
+
+function applyCentralMessage(){
+  const type = $("centralMsgType")?.value || "Aviso";
+  const text = $("centralMsgText")?.value.trim() || "";
+  if(!text){
+    alert("Escribe un mensaje para enviar al panel central.");
+    return;
+  }
+
+  const user = currentUser();
+  const techName = user?.role === "tech" ? (user.name || "Técnico") : (user?.name || "Coordinador");
+  const sector = $("sectorSelect")?.value || "";
+
+  state.messages.unshift({
+    id: uid(),
+    createdAt: new Date().toISOString(),
+    techName,
+    sector,
+    type,
+    text,
+  });
+
+  saveState();
+  closeModal($("modalCentralMessage"));
+  rerenderAll();
+  toast?.("Mensaje enviado al panel central");
+}
+
+function renderCentralMessageLog(){
+  const body = $("centralMessageLog");
+  if(!body) return;
+
+  const rows = (state.messages || [])
+    .slice(0, 20)
+    .map((item) => {
+      const when = new Date(item.createdAt || Date.now()).toLocaleString("es-ES", { hour12:false });
+      return `
+      <tr>
+        <td>${escapeHtml(when)}</td>
+        <td>${escapeHtml(item.techName || "—")}</td>
+        <td>${escapeHtml(item.sector || "—")}</td>
+        <td>${escapeHtml(item.type || "Aviso")}</td>
+        <td>${escapeHtml(item.text || "")}</td>
+      </tr>
+    `;
+    }).join("");
+
+  body.innerHTML = rows || `<tr><td colspan="5" class="muted">Sin mensajes.</td></tr>`;
 }
 
 // ---------- Quick modal ----------
@@ -2416,6 +2479,9 @@ function bootstrap(){
   $("btnShiftRequest").addEventListener("click", openShiftRequest);
   $("btnCloseShiftRequest").addEventListener("click", () => closeModal($("modalShiftRequest")));
   $("btnApplyShiftRequest").addEventListener("click", applyShiftRequest);
+  $("btnSendMessage").addEventListener("click", openCentralMessage);
+  $("btnCloseCentralMessage").addEventListener("click", () => closeModal($("modalCentralMessage")));
+  $("btnApplyCentralMessage").addEventListener("click", applyCentralMessage);
 
   $("btnPagePlanner").addEventListener("click", () => setActivePage("planner"));
   $("btnPageIncidents").addEventListener("click", () => setActivePage("incidents"));

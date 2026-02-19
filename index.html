@@ -172,6 +172,7 @@
       <button id="btnGuardPhones" class="btn">📞 Guardias</button>
       <button id="btnWeekEdit" class="btn">✏️ Semana</button>
       <button id="btnShiftRequest" class="btn">🔁 Cambio turno</button>
+      <button id="btnSendMessage" class="btn">💬 Mensaje central</button>
       <button id="btnPagePlanner" class="btn btn-primary">📋 Planificación</button>
       <button id="btnPageIncidents" class="btn">🚨 Incidencias</button>
       <button id="btnPageOT" class="btn">🛠️ OT</button>
@@ -228,6 +229,24 @@
             </tr>
           </thead>
           <tbody id="shiftChangeLog"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="changeBoard">
+      <div class="monthHead">Buzón de mensajes al panel central</div>
+      <div class="changeTableWrap">
+        <table class="changeTable">
+          <thead>
+            <tr>
+              <th>Fecha/hora</th>
+              <th>Técnico</th>
+              <th>Sector</th>
+              <th>Tipo</th>
+              <th>Mensaje</th>
+            </tr>
+          </thead>
+          <tbody id="centralMessageLog"></tbody>
         </table>
       </div>
     </section>
@@ -492,6 +511,30 @@
       </div>
       <div class="modalActions">
         <button id="btnApplyShiftRequest" class="btn btn-primary">Aplicar cambio y registrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalCentralMessage" class="modal hidden">
+    <div class="modalCard">
+      <div class="modalHead">
+        <h3>💬 Enviar mensaje al panel central</h3>
+        <button id="btnCloseCentralMessage" class="btn btn-small">Cerrar</button>
+      </div>
+      <div class="formRow">
+        <label>Tipo</label>
+        <select id="centralMsgType" class="input">
+          <option value="Cambio de turno">Cambio de turno</option>
+          <option value="Aviso">Aviso</option>
+          <option value="Incidencia de turno">Incidencia de turno</option>
+        </select>
+      </div>
+      <div class="formRow">
+        <label>Mensaje</label>
+        <textarea id="centralMsgText" class="textarea" rows="4" placeholder="Describe tu solicitud para el coordinador"></textarea>
+      </div>
+      <div class="modalActions">
+        <button id="btnApplyCentralMessage" class="btn btn-primary">Enviar mensaje</button>
       </div>
     </div>
   </div>
