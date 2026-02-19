@@ -1229,6 +1229,7 @@ function onTrayDurationChange(e){
 let activePage = "planner";
 
 function setActivePage(page){
+  if(isTech() && page === "planner") page = "incidents";
   activePage = page;
   const pages = {
     planner: "pagePlanner",
@@ -2856,6 +2857,7 @@ const UIv5 = loadUIv5();
 
 
 function toggleFlag(key){
+  if(isTech() && ["incMine","otMine"].includes(key)) return;
   UIv5[key] = !UIv5[key];
   saveUIv5(UIv5);
   rerenderAll();
@@ -3510,11 +3512,20 @@ function applyRoleUI(){
     // hide coordinator-only controls
     document.querySelectorAll('#btnUsers,#btnRosters').forEach(el=>el?.classList.add('hiddenRole'));
     document.querySelectorAll('#incAssignee,#otAssignee').forEach(el=>el?.classList.add('hiddenRole'));
+    document.querySelectorAll('#btnQuick,#btnGuardPhones,#btnWeekEdit,#btnShiftRequest,#btnAuto,#btnCloseDay,#btnPagePlanner,#tabPlanner').forEach(el=>el?.classList.add('hiddenRole'));
 
     if(meSel){
       // set option to me, disable editing
       meSel.disabled = true;
     }
+    if(UIv5.me !== meName() || !UIv5.incMine || !UIv5.otMine){
+      UIv5.me = meName();
+      UIv5.incMine = true;
+      UIv5.otMine = true;
+      saveUIv5(UIv5);
+    }
+
+    if(activePage === "planner") setActivePage("incidents");
     // enable onlyShift by default for tech
     try{
       const flags = loadUIFlags();
@@ -3523,6 +3534,7 @@ function applyRoleUI(){
     }catch{}
   }else{
     if(meSel) meSel.disabled = false;
+    document.querySelectorAll('#btnQuick,#btnGuardPhones,#btnWeekEdit,#btnShiftRequest,#btnAuto,#btnCloseDay,#btnPagePlanner,#tabPlanner').forEach(el=>el?.classList.remove('hiddenRole'));
   }
 }
 
@@ -3561,7 +3573,7 @@ function setLoginRoleUI(role){
   if(hint){
     hint.textContent = role==="coordinator"
       ? "👑 Acceso total"
-      : "👷 Solo ver/editar lo asignado a ti (móvil). Puedes crear OT.";
+      : "👷 Solo OT e Incidencias propias. Sin acceso al resto del panel.";
   }
 }
 
