@@ -573,6 +573,9 @@ function renderTray(state, dateISO, sector){
   const corr = daySector.tray.filter(t=>t.type==="Correctivo");
   const prev = daySector.tray.filter(t=>t.type==="Preventivo");
   const guard = daySector.tray.filter(t=>t.type==="Guardia móvil");
+  const customTypes = [...new Set(daySector.tray
+    .filter(t => !["Correctivo", "Preventivo", "Guardia móvil"].includes(t.type))
+    .map(t => t.type))];
 
   const makeCard = (t) => {
     const cls = t.type==="Correctivo" ? "red" : (t.type==="Guardia móvil" ? "blue" : "yellow");
@@ -594,6 +597,20 @@ function renderTray(state, dateISO, sector){
   $("trayPreventivos").innerHTML = prev.map(makeCard).join("") || `<div class="muted">Sin preventivos</div>`;
   $("trayGuardia").innerHTML = guard.map(makeCard).join("") || `<div class="muted">Sin guardia móvil</div>`;
 
+  const customWrap = $("trayCustomContainer");
+  if(customWrap){
+    customWrap.innerHTML = customTypes.map((type) => {
+      const items = daySector.tray.filter(t => t.type === type);
+      const id = `trayCustom_${slugifyType(type)}`;
+      return `
+        <div class="trayGroup">
+          <div class="trayTitle">📌 ${escapeHtml(type)}</div>
+          <div id="${id}" class="trayList">${items.map(makeCard).join("") || `<div class="muted">Sin tareas</div>`}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
   for(const el of document.querySelectorAll(".cardTask")){
     el.addEventListener("dragstart", onDragStartTray);
   }
@@ -602,6 +619,15 @@ function renderTray(state, dateISO, sector){
     input.addEventListener("dragstart", (e) => e.preventDefault());
     input.addEventListener("change", onTrayDurationChange);
   }
+}
+
+function slugifyType(type){
+  return String(type || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "") || "tipo";
 }
 
 function renderTechGrid(state, dateISO, sector){
@@ -1705,6 +1731,61 @@ function onQuickTypeChange(){
   ensureQuickTypeOptions();
   $("quickType").value = clean;
 }
+
+function editQuickType(){
+  const current = $("quickType").value;
+  if(!current || ["Correctivo", "Preventivo", "Guardia móvil", "__new"].includes(current)){
+    alert("Selecciona un tipo personalizado para editar.");
+    return;
+  }
+  const nextType = prompt("Editar tipo", current);
+  if(!nextType) return;
+  const clean = nextType.trim();
+  if(!clean || clean === current) return;
+  if(["Correctivo", "Preventivo", "Guardia móvil", "__new"].includes(clean)){
+    alert("Ese nombre está reservado. Elige otro.");
+    return;
+  }
+  if(state.customTypes.includes(clean)){
+    alert("Ese tipo ya existe.");
+    return;
+  }
+  state.customTypes = state.customTypes.map((t) => t === current ? clean : t);
+  for(const dk of Object.keys(state.tasks || {})){
+    for(const sec of Object.keys(state.tasks[dk] || {})){
+      const ds = state.tasks[dk][sec];
+      if(!ds?.tray) continue;
+      ds.tray.forEach((task) => {
+        if(task.type === current) task.type = clean;
+      });
+    }
+  }
+  saveState();
+  ensureQuickTypeOptions();
+  $("quickType").value = clean;
+  rerenderAll();
+}
+
+function deleteQuickType(){
+  const current = $("quickType").value;
+  if(!current || ["Correctivo", "Preventivo", "Guardia móvil", "__new"].includes(current)){
+    alert("Selecciona un tipo personalizado para borrar.");
+    return;
+  }
+  if(!confirm(`¿Borrar el tipo \"${current}\" y quitar sus tarjetas de la bandeja?`)) return;
+  state.customTypes = state.customTypes.filter((t) => t !== current);
+  for(const dk of Object.keys(state.tasks || {})){
+    for(const sec of Object.keys(state.tasks[dk] || {})){
+      const ds = state.tasks[dk][sec];
+      if(!ds?.tray) continue;
+      ds.tray = ds.tray.filter((task) => task.type !== current);
+    }
+  }
+  saveState();
+  ensureQuickTypeOptions();
+  $("quickType").value = "Preventivo";
+  rerenderAll();
+}
 function createQuickCard(){
   const type = $("quickType").value;
   const title = $("quickTitle").value.trim() || (type==="Correctivo" ? "INC-____ | Ubicación" : (type==="Guardia móvil" ? "Guardia móvil — incidencia" : `${type} — tarea`));
@@ -2311,6 +2392,8 @@ function bootstrap(){
   $("btnCloseQuick").addEventListener("click", () => closeModal($("modalQuick")));
   $("btnCreateCard").addEventListener("click", createQuickCard);
   $("quickType").addEventListener("change", onQuickTypeChange);
+  $("btnEditQuickType")?.addEventListener("click", editQuickType);
+  $("btnDeleteQuickType")?.addEventListener("click", deleteQuickType);
 
   $("btnGuardPhones").addEventListener("click", () => {
     renderGuardPhonesModal();

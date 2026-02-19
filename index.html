@@ -178,7 +178,7 @@
       <button id="btnAuto" class="btn">🤖 Auto</button>
       <button id="btnRosters" class="btn hiddenRole">📆 Cuadrantes</button>
       <button id="btnUsers" class="btn hiddenRole">👥 Usuarios</button>
-      <button id="btnLogout" class="btn btn-small hiddenRole">🚪 Salir</button>
+      <button id="btnLogout" class="btn btn-small hiddenRole">🚪 Cerrar sesión</button>
       <button id="btnCloseDay" class="btn btn-danger">Cerrar día</button>
     </div>
   </header>
@@ -258,6 +258,8 @@
           <div id="trayGuardia" class="trayList"></div>
           <button id="btnNewGuardia" class="btn btn-small btn-outline">+ Guardia móvil</button>
         </div>
+
+        <div id="trayCustomContainer"></div>
 
         <div class="legend">
           <div class="chip"><span class="sq free"></span> Libre</div>
@@ -406,6 +408,10 @@
           <option value="Guardia móvil">Guardia móvil</option>
           <option value="__new">+ Crear nuevo tipo...</option>
         </select>
+        <div class="inlineActions" style="margin-top:8px;">
+          <button id="btnEditQuickType" class="btn btn-small btn-outline" type="button">✏️ Editar tipo</button>
+          <button id="btnDeleteQuickType" class="btn btn-small btn-danger" type="button">🗑️ Borrar tipo</button>
+        </div>
       </div>
 
       <div class="formRow">
