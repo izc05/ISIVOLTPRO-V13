@@ -2359,9 +2359,6 @@ function bootstrap(){
   generateAutoReport();
 }
 
-bootstrap();
-
-
 // ===== Fondo dinámico por hora local =====
 function applyTimeBackground(){
   const h = new Date().getHours();
@@ -2772,6 +2769,7 @@ function renderFilterChips(){
 }
 window.addEventListener("DOMContentLoaded", renderFilterChips);
 
+bootstrap();
 
 function handleDropTrayINC(techName, dateISO, sector, trayItem){
   if(!trayItem || trayItem.type!=="INC") return false;
