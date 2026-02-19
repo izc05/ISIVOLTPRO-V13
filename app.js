@@ -1490,6 +1490,30 @@ function rerenderAll(){
 }
 
 // ---------- Import modal actions ----------
+
+
+async function loadImportFileIntoModal(file){
+  if(!file) return;
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  let csvText = '';
+
+  if(ext === 'csv'){
+    csvText = await file.text();
+  }else if(ext === 'xlsx' || ext === 'xls'){
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    csvText = XLSX.utils.sheet_to_csv(ws);
+  }else{
+    throw new Error('Formato no soportado. Usa .xlsx, .xls o .csv');
+  }
+
+  const csvInput = $("csvInput");
+  if(csvInput) csvInput.value = csvText.trim();
+  const fileName = document.getElementById('importRosterFileName');
+  if(fileName) fileName.textContent = `Archivo: ${file.name}`;
+}
+
 function processCsv(){
   const sector = $("sectorSelect").value;
   const csvText = $("csvInput").value.trim();
@@ -2248,8 +2272,24 @@ function bootstrap(){
   $("btnImport").addEventListener("click", () => {
     openModal($("modalImport"));
     $("csvInput").value = "";
+    const importFile = document.getElementById("importRosterFile");
+    const importFileName = document.getElementById("importRosterFileName");
+    if(importFile) importFile.value = "";
+    if(importFileName) importFileName.textContent = "Sin archivo seleccionado";
   });
   $("btnCloseImport").addEventListener("click", () => closeModal($("modalImport")));
+  const importRosterFile = document.getElementById("importRosterFile");
+  importRosterFile?.addEventListener("change", async () => {
+    const f = importRosterFile.files?.[0];
+    if(!f) return;
+    try{
+      await loadImportFileIntoModal(f);
+      toast?.(`Archivo cargado: ${f.name}`);
+    }catch(err){
+      console.error(err);
+      alert("No se pudo leer el archivo: " + (err.message || err));
+    }
+  });
   $("btnLoadDefault").addEventListener("click", () => { $("csvInput").value = DEFAULT_FONT_CSV; });
   $("btnProcessCsv").addEventListener("click", processCsv);
   $("btnResetAll").addEventListener("click", resetAll);
