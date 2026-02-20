@@ -1983,6 +1983,7 @@ function statusPrev(s){
 
 function renderKanbanBoard(container, items, kind){
   if(!container) return;
+  const techReadOnly = isTech();
   const groups = { "Pendiente":[], "En curso":[], "Cerrada":[] };
   items.forEach(it => {
     const st = it.status || "Pendiente";
@@ -2030,13 +2031,13 @@ function renderKanbanBoard(container, items, kind){
             <span class="badgePill">📷 ${photosCount}</span>
           </div>
           <div class="kanActions">
-            <button class="btnTiny" data-prev="${id}" ${st==="Pendiente" ? "disabled" : ""}>⬅</button>
-            <button class="btnTiny primary" data-next="${id}" ${st==="Cerrada" ? "disabled" : ""}>➡</button>
+            <button class="btnTiny ${techReadOnly ? "hiddenRole" : ""}" data-prev="${id}" ${st==="Pendiente" ? "disabled" : ""}>⬅</button>
+            <button class="btnTiny primary ${techReadOnly ? "hiddenRole" : ""}" data-next="${id}" ${st==="Cerrada" ? "disabled" : ""}>➡</button>
             <button class="btnTiny" data-sharewa="${id}">🟢 WA</button>
             <button class="btnTiny" data-sharemail="${id}">✉️</button>
-            <button class="btnTiny" data-open="${id}">⚡</button>
+            <button class="btnTiny ${techReadOnly ? "hiddenRole" : ""}" data-open="${id}">⚡</button>
             <button class="btnTiny" data-copy="${id}">📋</button>
-            <button class="btnTiny danger" data-del="${id}">🗑</button>
+            <button class="btnTiny danger ${techReadOnly ? "hiddenRole" : ""}" data-del="${id}">🗑</button>
           </div>
         </div>
       `;
@@ -2045,6 +2046,7 @@ function renderKanbanBoard(container, items, kind){
     // actions
     listEl.querySelectorAll("[data-next]").forEach(b=>{
       b.addEventListener("click", ()=>{
+        if(isTech()){ toast?.("Solo coordinador puede modificar estados"); return; }
         const id = b.getAttribute("data-next");
         if(kind==="inc"){
           const item = state.incidents.find(x=>x.id===id);
@@ -2067,6 +2069,7 @@ function renderKanbanBoard(container, items, kind){
     });
     listEl.querySelectorAll("[data-prev]").forEach(b=>{
       b.addEventListener("click", ()=>{
+        if(isTech()){ toast?.("Solo coordinador puede modificar estados"); return; }
         const id = b.getAttribute("data-prev");
         if(kind==="inc"){
           const item = state.incidents.find(x=>x.id===id);
@@ -2116,6 +2119,7 @@ function renderKanbanBoard(container, items, kind){
 
     listEl.querySelectorAll("[data-open]").forEach(b=>{
       b.addEventListener("click", ()=>{
+        if(isTech()){ toast?.("Solo coordinador puede editar elementos"); return; }
         const id=b.getAttribute("data-open");
         openQuickUpdate(kind, id);
       });
@@ -2151,6 +2155,7 @@ function renderKanbanBoard(container, items, kind){
     });
     listEl.querySelectorAll("[data-del]").forEach(b=>{
       b.addEventListener("click", ()=>{
+        if(isTech()){ toast?.("Solo coordinador puede borrar elementos"); return; }
         const id=b.getAttribute("data-del");
         if(!confirm("⚠️ Vas a BORRAR este elemento definitivamente.\n\n¿Seguro?")) return;
         if(kind==="inc"){
@@ -3616,6 +3621,7 @@ function applyRoleUI(){
   }else{
     if(meSel) meSel.disabled = false;
     if(meLabel) meLabel.textContent = "Yo";
+    document.querySelectorAll('#btnUsers,#btnRosters,#incAssignee,#otAssignee').forEach(el=>el?.classList.remove('hiddenRole'));
     document.querySelectorAll('#btnQuick,#btnGuardPhones,#btnWeekEdit,#btnShiftRequest,#btnAuto,#btnCloseDay,#btnPagePlanner,#tabPlanner').forEach(el=>el?.classList.remove('hiddenRole'));
   }
 }
