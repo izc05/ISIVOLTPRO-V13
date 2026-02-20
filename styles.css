@@ -1084,3 +1084,95 @@ body.bg-night #bgSky{background: radial-gradient(1000px 650px at 20% 0%, rgba(18
   0%, 100%{ box-shadow: 0 0 12px rgba(29,215,95,.5); }
   50%{ box-shadow: 0 0 28px rgba(29,215,95,.9), 0 0 48px rgba(29,215,95,.35); }
 }
+
+/* ===== MOBILE TUNING (audit 2026-02) ===== */
+@media (max-width: 768px){
+  .topbar{
+    padding: 10px 12px;
+    align-items: stretch;
+  }
+  .brand{ width: 100%; }
+  .toolbar{ width: 100%; }
+
+  .pill,
+  .clockPill{
+    width: 100%;
+    min-width: 0;
+  }
+  .pill input,
+  .pill select{
+    width: 100%;
+    min-width: 0;
+  }
+
+  .title{ font-size: clamp(1.02rem, 4.5vw, 1.24rem); }
+  .subtitle{ font-size: 11px; }
+
+  .layout{
+    margin: 10px auto;
+    padding: 0 10px;
+    gap: 10px;
+  }
+
+  .monthBoard,
+  .weekBoard,
+  .sectorCard,
+  .tray,
+  .techArea,
+  .changeBoard,
+  .modalCard{
+    border-radius: 14px;
+    padding: 10px;
+  }
+
+  .sectorMeta{ grid-template-columns: 1fr; }
+
+  .calTable{ overflow-x: auto; }
+  .calHeader,
+  .calRow{
+    min-width: 660px;
+    grid-template-columns: minmax(148px, 1.25fr) repeat(7, minmax(68px, 1fr));
+  }
+
+  .toolButtons,
+  .modalActions,
+  .stackActions{
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .btn,
+  .btn-small{ width: 100%; }
+
+  .phoneRow{
+    grid-template-columns: 1fr;
+    gap: 6px;
+    align-items: start;
+  }
+}
+
+@media (max-width: 560px){
+  .pageTabs{
+    gap: 4px;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  }
+  body{ padding-bottom: 80px; }
+
+  .mday{
+    min-height: 40px;
+    font-size: 10px;
+    padding: 3px;
+  }
+
+  .changeTable th,
+  .changeTable td{
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+
+  .loginCard{
+    width: min(96vw, 460px);
+    border-radius: 16px;
+    padding: 12px;
+  }
+}
