@@ -2417,10 +2417,12 @@ window.addEventListener("DOMContentLoaded", initMeSelect);
 // ---------- Bootstrap ----------
 function bootstrap(){
   const view = loadViewState();
-  $("datePicker").value = view.dateISO || todayISO();
+  const currentDate = todayISO();
+  $("datePicker").value = currentDate;
   if(view.sector && Array.from($("sectorSelect").options).some(o => o.value === view.sector)){
     $("sectorSelect").value = view.sector;
   }
+  saveViewState({ ...view, dateISO: currentDate, sector: $("sectorSelect").value });
 
   // Load default roster if missing
   if(!state.rosters["Fontanería"] || !state.rosters["Fontanería"].months){
@@ -3700,8 +3702,18 @@ function doLogin(role){
       return;
     }
     saveSession({ role:"coordinator", name:"Coordinador" });
+    UIv5.incMine = false;
+    UIv5.otMine = false;
+    saveUIv5(UIv5);
+    try{
+      const flags = loadUIFlags();
+      flags.onlyShift = false;
+      saveUIFlags(flags);
+    }catch{}
     closeLogin();
     applyRoleUI();
+    fillAssigneeSelects();
+    initMeSelect();
     rerenderAll();
     toast?.("Bienvenido, Coordinador");
     return;
@@ -3726,6 +3738,8 @@ function doLogin(role){
   saveUIv5(UIv5);
   closeLogin();
   applyRoleUI();
+  fillAssigneeSelects();
+  initMeSelect();
   rerenderAll();
   toast?.(`Hola ${userSel}`);
 }
@@ -3749,6 +3763,9 @@ function initAuthUI(){
     clearSession();
     openLogin();
     applyRoleUI();
+    fillAssigneeSelects();
+    initMeSelect();
+    rerenderAll();
   });
 
   // show login if no session
