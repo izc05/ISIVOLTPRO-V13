@@ -110,6 +110,8 @@ const mediaState = {
   otPhotos: [],
 };
 
+let followTodayDate = true;
+
 const VIEW_KEY = "panel_last_view_v1";
 function loadViewState(){
   try{ return JSON.parse(localStorage.getItem(VIEW_KEY) || "{}"); }
@@ -2461,6 +2463,7 @@ function bootstrap(){
     rerenderAll();
   });
   $("datePicker").addEventListener("change", () => {
+    followTodayDate = $("datePicker").value === todayISO();
     persistCurrentView();
     rerenderAll();
   });
@@ -2588,8 +2591,21 @@ function bootstrap(){
     const el = $("currentTime");
     if(el) el.textContent = formatCurrentTime();
   };
+
+  const syncDateWithToday = () => {
+    const picker = $("datePicker");
+    if(!picker) return;
+    const today = todayISO();
+    if(!followTodayDate) return;
+    if(picker.value === today) return;
+    picker.value = today;
+    persistCurrentView();
+    rerenderAll();
+  };
+
   updateClock();
   setInterval(updateClock, 1000);
+  setInterval(syncDateWithToday, 60 * 1000);
 
   // Render inicial
   setActivePage(view.page || "planner");
