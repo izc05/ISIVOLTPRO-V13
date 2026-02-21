@@ -105,6 +105,20 @@ const mediaState = {
   otPhotos: [],
 };
 
+const VIEW_KEY = "panel_last_view_v1";
+function loadViewState(){
+  try{ return JSON.parse(localStorage.getItem(VIEW_KEY) || "{}"); }
+  catch{ return {}; }
+}
+function saveViewState(next){
+  localStorage.setItem(VIEW_KEY, JSON.stringify(next || {}));
+}
+function persistCurrentView(){
+  const dateISO = document.getElementById("datePicker")?.value || todayISO();
+  const sector = document.getElementById("sectorSelect")?.value || "Electricidad";
+  saveViewState({ dateISO, sector, page: activePage || "planner" });
+}
+
 function dateKey(dateISO){
   return dateISO;
 }
@@ -1245,6 +1259,7 @@ function setActivePage(page){
   $("btnPagePlanner").classList.toggle("btn-primary", page === "planner");
   $("btnPageIncidents").classList.toggle("btn-primary", page === "incidents");
   $("btnPageOT").classList.toggle("btn-primary", page === "ot");
+  persistCurrentView();
 }
 
 function createIncident(){
@@ -2401,7 +2416,11 @@ window.addEventListener("DOMContentLoaded", initMeSelect);
 
 // ---------- Bootstrap ----------
 function bootstrap(){
-  $("datePicker").value = todayISO();
+  const view = loadViewState();
+  $("datePicker").value = view.dateISO || todayISO();
+  if(view.sector && Array.from($("sectorSelect").options).some(o => o.value === view.sector)){
+    $("sectorSelect").value = view.sector;
+  }
 
   // Load default roster if missing
   if(!state.rosters["Fontanería"] || !state.rosters["Fontanería"].months){
@@ -2424,11 +2443,15 @@ function bootstrap(){
 
   // Handlers
   $("sectorSelect").addEventListener("change", () => {
+    persistCurrentView();
     fillAssigneeSelects();
     initMeSelect();
     rerenderAll();
   });
-  $("datePicker").addEventListener("change", () => rerenderAll());
+  $("datePicker").addEventListener("change", () => {
+    persistCurrentView();
+    rerenderAll();
+  });
 
   $("btnImport").addEventListener("click", () => {
     openModal($("modalImport"));
@@ -2557,7 +2580,7 @@ function bootstrap(){
   setInterval(updateClock, 1000);
 
   // Render inicial
-  setActivePage("planner");
+  setActivePage(view.page || "planner");
   ensureQuickTypeOptions();
   renderPhotoPreview("incident");
   renderPhotoPreview("ot");
@@ -3678,6 +3701,7 @@ function doLogin(role){
     }
     saveSession({ role:"coordinator", name:"Coordinador" });
     closeLogin();
+    applyRoleUI();
     rerenderAll();
     toast?.("Bienvenido, Coordinador");
     return;
@@ -3701,6 +3725,7 @@ function doLogin(role){
   UIv5.me = userSel;
   saveUIv5(UIv5);
   closeLogin();
+  applyRoleUI();
   rerenderAll();
   toast?.(`Hola ${userSel}`);
 }
