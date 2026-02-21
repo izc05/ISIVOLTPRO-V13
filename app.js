@@ -33,6 +33,11 @@ function loadFullState(){
 }
 const state = loadFullState();
 
+function syncStateFromStorage(){
+  const latest = loadFullState();
+  Object.assign(state, latest);
+}
+
 function getState(){ return state; }
 
 function saveState(){
@@ -1535,6 +1540,11 @@ function rerenderAll(){
   renderFilterChips();
 }
 
+function refreshFromStorageAndRender(){
+  syncStateFromStorage();
+  rerenderAll();
+}
+
 // ---------- Import modal actions ----------
 
 
@@ -2601,6 +2611,18 @@ function applyTimeBackground(){
 }
 setInterval(applyTimeBackground, 60*1000);
 window.addEventListener("DOMContentLoaded", applyTimeBackground);
+
+// ===== Cross-tab sync =====
+window.addEventListener("storage", (event) => {
+  if(!event?.key) return;
+  if(!Object.values(LS).includes(event.key)) return;
+  refreshFromStorageAndRender();
+});
+
+window.addEventListener("focus", refreshFromStorageAndRender);
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "visible") refreshFromStorageAndRender();
+});
 
 
 // ===== AUTO_SCROLL_ON_DRAG: al arrastrar, la página baja/sube sola =====
