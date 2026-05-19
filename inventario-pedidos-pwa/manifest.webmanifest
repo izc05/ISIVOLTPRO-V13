@@ -1,0 +1,14 @@
+{
+  "name": "IsiVoltPro Pedidos Almacén",
+  "short_name": "Pedidos IV",
+  "description": "Registro diario de pedidos de almacén con foto, histórico local, memoria y PDF.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#071E3D",
+  "theme_color": "#071E3D",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
