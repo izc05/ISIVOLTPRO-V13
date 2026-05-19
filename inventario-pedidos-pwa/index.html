@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071E3D">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg">
+<title>IsiVoltPro Pedidos</title>
+<style>
+:root{--navy:#071E3D;--gold:#FFC928;--line:#dbe3ef;--bg:#f1f5f9;--mut:#64748b}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:#0f172a}header{background:linear-gradient(135deg,var(--navy),#0B2A55);color:white;padding:14px 14px 12px;border-radius:0 0 28px 28px;box-shadow:0 14px 32px #0f172a30}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{display:flex;align-items:center;gap:10px}.logo{width:46px;height:46px;border-radius:17px;background:#071a35;border:3px solid var(--gold);display:grid;place-items:center;color:var(--gold);font-weight:1000}.brand b{font-size:20px}.brand b span{color:var(--gold)}.brand small{display:block;color:#dbeafe;font-weight:800;text-transform:uppercase;font-size:10px}.btn{border:0;border-radius:15px;padding:11px 13px;font-weight:1000;background:var(--gold);color:var(--navy)}.btn.dark{background:#ffffff18;color:white;border:1px solid #ffffff28}.panel{display:none;margin-top:12px;background:white;color:#0f172a;border:1px solid var(--line);border-radius:20px;padding:12px}.panel.on{display:block}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.box{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:10px}.box small{display:block;color:var(--mut);font-weight:900;text-transform:uppercase;font-size:10px}.box b{display:block;color:var(--navy);font-size:18px;margin-top:2px}.bar{height:12px;border-radius:999px;background:#e2e8f0;overflow:hidden;margin-top:10px}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#fb923c);width:0}.hint{font-size:12px;color:var(--mut);line-height:1.4;margin:8px 0 0}iframe{width:100%;height:calc(100vh - 76px);border:0;display:block}@media(max-width:520px){.grid{grid-template-columns:1fr 1fr}.brand b{font-size:18px}.btn{font-size:13px;padding:10px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand"><div class="logo">IV</div><div><b>IsiVolt<span>Pro</span></b><small>Pedidos almacén</small></div></div>
+    <div style="display:flex;gap:8px"><button class="btn dark" onclick="toggleMemory()">Memoria</button><button id="installBtn" class="btn" onclick="installApp()">Instalar</button></div>
+  </div>
+  <div id="memoryPanel" class="panel">
+    <div class="grid">
+      <div class="box"><small>Uso navegador</small><b id="usage">--</b></div>
+      <div class="box"><small>Disponible</small><b id="quota">--</b></div>
+      <div class="box"><small>Porcentaje</small><b id="percent">--</b></div>
+    </div>
+    <div class="bar"><span id="bar"></span></div>
+    <p class="hint">Este dato es aproximado. La base de pedidos y fotos se guarda localmente en el móvil. Haz copia JSON desde la pestaña Datos de la app.</p>
+  </div>
+</header>
+<iframe src="../inventario-pedidos-local/" title="IsiVoltPro Pedidos Almacén"></iframe>
+<script>
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='inline-flex'});
+async function installApp(){
+  if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;return;}
+  alert('Si no aparece instalación automática: en Chrome pulsa ⋮ y elige “Instalar app” o “Añadir a pantalla de inicio”.');
+}
+function toggleMemory(){document.getElementById('memoryPanel').classList.toggle('on');updateMemory();}
+async function updateMemory(){
+  if(navigator.storage&&navigator.storage.estimate){
+    const e=await navigator.storage.estimate();
+    const u=(e.usage||0)/1024/1024;
+    const q=(e.quota||0)/1024/1024;
+    const p=q?Math.min(100,u/q*100):0;
+    usage.textContent=u.toFixed(0)+' MB';
+    quota.textContent=q.toFixed(0)+' MB';
+    percent.textContent=p.toFixed(1)+'%';
+    bar.style.width=p+'%';
+  }else{usage.textContent='No disponible';quota.textContent='No disponible';percent.textContent='--';}
+}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}
+setInterval(()=>{if(document.getElementById('memoryPanel').classList.contains('on'))updateMemory()},5000);
+</script>
+</body>
+</html>
